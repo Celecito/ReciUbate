@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "250033235653",
+    "project_id": "reciubate",
+    "storage_bucket": "reciubate.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:250033235653:android:923dface2040f39650b2ac",
+        "android_client_info": {
+          "package_name": "com.example.reci_ubate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD16i1IVvdWK0rt-EFbqY3iiicgJr9ABe0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
