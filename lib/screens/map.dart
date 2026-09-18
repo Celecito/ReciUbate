@@ -214,7 +214,7 @@ class _MapScreenState extends State<MapScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Mapa puntos de salud cercanos'),
+            title: const Text('Mapa puntos de recolección'),
             backgroundColor: const Color(0xFF238501),
             foregroundColor: Colors.white,
             actions: [
