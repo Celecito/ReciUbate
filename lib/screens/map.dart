@@ -100,6 +100,28 @@ class _MapScreenState extends State<MapScreen> {
     return min;
   }
 
+  /// Devuelve el punto registrado de la ruta más cercano a la ubicación actual.
+  LatLng? _getNearestPointOnRoute(CollectionRoute route) {
+    if (_currentLocation == null || route.points.isEmpty) return null;
+
+    const Distance distance = Distance();
+    LatLng nearestPoint = route.points.first;
+    double minDistance = double.infinity;
+
+    for (final point in route.points) {
+      final meters = distance.as(
+        LengthUnit.Meter,
+        _currentLocation!,
+        point,
+      );
+      if (meters < minDistance) {
+        minDistance = meters;
+        nearestPoint = point;
+      }
+    }
+    return nearestPoint;
+  }
+
   void _recalculateNearbyRoutes() {
     if (_currentLocation == null) return;
     final nearby = _collectionRoutes
@@ -284,7 +306,7 @@ class _MapScreenState extends State<MapScreen> {
                       Polyline(
                           points: _navigationRoute,
                           strokeWidth: 5,
-                          color: const Color(0xFF238501))
+                          color: const Color(0xFF074CB6))
                     ]),
 
                   // Marcadores inicio/fin de rutas
@@ -666,8 +688,9 @@ class _MapScreenState extends State<MapScreen> {
       borderRadius: BorderRadius.circular(12),
       onTap: () {
         Navigator.pop(context);
-        if (route.points.isNotEmpty) {
-          _mapController.move(route.points.first, 15.0);
+        final nearestPoint = _getNearestPointOnRoute(route);
+        if (nearestPoint != null) {
+          _mapController.move(nearestPoint, 16.0);
         }
         Future.delayed(const Duration(milliseconds: 300),
                 () => _showRouteDetails(route));
@@ -786,8 +809,20 @@ class _MapScreenState extends State<MapScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
+                final nearestPoint = _getNearestPointOnRoute(route);
                 Navigator.pop(context);
-                if (route.points.isNotEmpty) _getRoute(route.points.first);
+
+                if (nearestPoint != null) {
+                  _getRoute(nearestPoint);
+                } else if (_currentLocation == null) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Activa tu ubicación para encontrar el punto más cercano.',
+                      ),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: route.color,
@@ -797,7 +832,7 @@ class _MapScreenState extends State<MapScreen> {
                     borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.directions),
-              label: const Text('Cómo llegar al inicio de la ruta',
+              label: const Text('Cómo llegar al punto más cercano',
                   style: TextStyle(fontSize: 15)),
             ),
           ],
@@ -1006,20 +1041,7 @@ class CollectionRoute {
     this.proximityRadiusMeters = 400,
   });
 
-  /// Estructura esperada en Firestore (colección: collection_routes):
-  ///
-  /// {
-  ///   "name"                 : "Ruta Norte",
-  ///   "description"          : "Barrios La Esperanza...",
-  ///   "schedule"             : "Lunes, Miércoles y Viernes: 6:00 AM - 10:00 AM",
-  ///   "color"                : 4294944000,   // int → Colors.orange.value
-  ///   "proximityRadiusMeters": 400,
-  ///   "active"               : true,
-  ///   "points": [
-  ///     { "lat": 5.3210, "lng": -73.8180 },
-  ///     { "lat": 5.3195, "lng": -73.8165 }
-  ///   ]
-  /// }
+
   factory CollectionRoute.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
